@@ -104,156 +104,6 @@ tradeTab:CreateButton({
         })
     end,
 })
-tradeTab:CreateSection("Steal")
-
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local SelectedPlayer = nil
-
-local WantedPets = {
-    "Kitsune", "Queen bee", "T-rex", "Disco bee", "Corrupted Kitsune",
-    "Raccoon", "Dragonfly", "Butterfly", "Spinosaurus",
-    "Lobster Thermidor", "French Fry Ferret", "Golden Goose", "Mimic Octopus"
-}
-
-local playerDropdown = tradeTab:CreateDropdown({
-    Name = "Chọn người chơi",
-    Options = {},
-    CurrentOption = "",
-    MultipleOptions = false,
-    Callback = function(opt)
-        if type(opt) == "table" then
-            SelectedPlayer = opt[1]
-        else
-            SelectedPlayer = opt
-        end
-    end,
-})
-
-local function updatePlayerDropdown()
-    local list = {}
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer then
-            table.insert(list, p.Name)
-        end
-    end
-    pcall(function() playerDropdown:Refresh(list, true) end)
-    pcall(function() playerDropdown:Set(list) end)
-    pcall(function() playerDropdown:SetOptions(list) end)
-    pcall(function()
-        if playerDropdown.Clear and playerDropdown.AddOption then
-            playerDropdown:Clear()
-            for _, n in ipairs(list) do playerDropdown:AddOption(n) end
-        end
-    end)
-end
-
-updatePlayerDropdown()
-Players.PlayerAdded:Connect(updatePlayerDropdown)
-Players.PlayerRemoving:Connect(updatePlayerDropdown)
-
-tradeTab:CreateButton({
-    Name = "Quét người chơi",
-    Callback = function()
-        updatePlayerDropdown()
-        Rayfield:Notify({
-            Title = "Steal",
-            Content = "Đã quét danh sách người chơi trong server.",
-            Duration = 3,
-        })
-    end,
-})
-
-tradeTab:CreateButton({
-    Name = "Quét Inventory",
-    Callback = function()
-        if not SelectedPlayer or SelectedPlayer == "" then
-            Rayfield:Notify({
-                Title = "Steal",
-                Content = "Bạn chưa chọn người chơi!",
-                Duration = 3,
-            })
-            return
-        end
-        local target = Players:FindFirstChild(SelectedPlayer)
-        if not target then
-            Rayfield:Notify({
-                Title = "Steal",
-                Content = "Người chơi không tồn tại!",
-                Duration = 3,
-            })
-            return
-        end
-
-        local found = {}
-        local foldersToCheck = {"Backpack", "Pets", "Garden", "Garde", "Inventory", "Storage"}
-
-        for _, fname in ipairs(foldersToCheck) do
-            local folder = target:FindFirstChild(fname)
-            if folder and folder.GetChildren then
-                for _, item in ipairs(folder:GetChildren()) do
-                    for _, w in ipairs(WantedPets) do
-                        if string.find(string.lower(tostring(item.Name or "")), string.lower(w)) then
-                            table.insert(found, string.format("%s (trong %s)", item.Name, fname))
-                            break
-                        end
-                    end
-                end
-            end
-        end
-
-        if #found > 0 then
-            for _, msg in ipairs(found) do
-                Rayfield:Notify({
-                    Title = "Steal",
-                    Content = SelectedPlayer .. " có: " .. msg,
-                    Duration = 6,
-                })
-            end
-        else
-            Rayfield:Notify({
-                Title = "Steal",
-                Content = "Không tìm thấy pet hiếm trong inventory của " .. SelectedPlayer,
-                Duration = 4,
-            })
-        end
-    end,
-})
-
-tradeTab:CreateButton({
-    Name = "Đưa tất cả pet xịn",
-    Callback = function()
-        task.wait(2)
-        Rayfield:Notify({
-            Title = "Steal",
-            Content = "Đang chuyển tất cả pet xịn...",
-            Duration = 2,
-        })
-        task.wait(5)
-        Rayfield:Notify({
-            Title = "Steal",
-            Content = "Chuyển pet hoàn tất!",
-            Duration = 4,
-        })
-    end,
-})
-
-tradeTab:CreateButton({
-    Name = "Gửi yêu cầu trade",
-    Callback = function()
-        Rayfield:Notify({
-            Title = "Steal",
-            Content = "Đang gửi yêu cầu trade...",
-            Duration = 2,
-        })
-        task.wait(2)
-        Rayfield:Notify({
-            Title = "Steal",
-            Content = "Yêu cầu trade đã gửi thành công!",
-            Duration = 4,
-        })
-    end,
-})
 
 local randTab = Window:CreateTab("Randomize", 4483362458)
 
@@ -354,37 +204,13 @@ finderTab:CreateButton({
         Rayfield:Notify({
             Title = "Finder",
             Content = "Đang tìm... Vui lòng đợi",
-            Duration = 3,
+            Duration = 5,
         })
 
-        local priorityList = {
-            "Corrupted Kitsune", "Queen bee", "Dragonfly", "T-rex", "Spinosaurus",
-            "Butterfly", "Raccoon", "Disco bee", "Kitsune"
-        }
-
-        local bestPet = nil
-        for _, player in ipairs(game.Players:GetPlayers()) do
-            if player ~= game.Players.LocalPlayer then
-                local petsFolders = {player:FindFirstChild("Backpack"), player:FindFirstChild("Pets"), player:FindFirstChild("Garden")}
-                for _, folder in pairs(petsFolders) do
-                    if folder then
-                        for _, pet in pairs(folder:GetDescendants()) do
-                            if table.find(priorityList, pet.Name) then
-                                bestPet = pet.Name
-                                break
-                            end
-                        end
-                    end
-                    if bestPet then break end
-                end
-            end
-            if bestPet then break end
-        end
-
-        Rayfield:Notify({
-            Title = "Finder",
-            Content = "Best pet in server is: " .. (bestPet or "No"),
-            Duration = 4,
-        })
+        game:GetService("TeleportService"):TeleportToPlaceInstance(
+            game.PlaceId,
+            game.JobId,
+            game:GetService("Players").LocalPlayer
+        )
     end,
 })
