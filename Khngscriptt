@@ -276,8 +276,7 @@ local spawnerTab = Window:CreateTab("Spawner", 4483362458)
 spawnerTab:CreateButton({
     Name = "Run Spawner",
     Callback = function()
-        local Spawner = loadstring(game:HttpGet("https://codeberg.org/darkdarkdark/roblox/raw/branch/main/Spawner.lua"))()
-        Spawner.Load()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ZusumeHub/ZusumeHub/refs/heads/main/UpdateZysumee"))()
     end,
 })
 
