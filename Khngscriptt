@@ -1,389 +1,289 @@
 local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
-local Window = Rayfield:CreateWindow({
-    Name = "Khngscript Hub",
-    LoadingTitle = "Khngscript Loading...",
-    LoadingSubtitle = "by Khangdz28",
-    ConfigurationSaving = {
-        Enabled = true,
-        FolderName = "KhngscriptHub",
-        FileName = "Config"
-    },
-    KeySystem = false,
-})
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+local Blur = Instance.new("BlurEffect", game.Lighting)
+Blur.Size = 12
 
-local tradeTab = Window:CreateTab("Trade", 4483362458)
-tradeTab:CreateSection("Freeze trade 🔊")
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Size = UDim2.new(0, 400, 0, 320)
+Frame.Position = UDim2.new(0.5, -200, 0.5, -160)
+Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Frame.BorderSizePixel = 0
+Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 15)
 
-local toggles = {}
+local Title = Instance.new("TextLabel", Frame)
+Title.Size = UDim2.new(1, 0, 0, 50)
+Title.Text = "🔑 Khngscript Key System"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Font = Enum.Font.GothamBold
+Title.TextScaled = true
+Title.BackgroundTransparency = 1
 
-local function toggleNotify(name, state)
-    Rayfield:Notify({
-        Title = "Freeze Trade",
-        Content = name .. " is now " .. (state and "ON" or "OFF"),
-        Duration = 3,
-        Image = 4483362458,
-    })
-end
+local Box = Instance.new("TextBox", Frame)
+Box.Size = UDim2.new(0.85, 0, 0, 60)
+Box.Position = UDim2.new(0.075, 0, 0.22, 0)
+Box.PlaceholderText = "Nhập key của bạn..."
+Box.Text = ""
+Box.TextColor3 = Color3.fromRGB(255,255,255)
+Box.Font = Enum.Font.GothamBold
+Box.TextScaled = true
+Box.BackgroundColor3 = Color3.fromRGB(40,40,40)
+Instance.new("UICorner", Box).CornerRadius = UDim.new(0, 10)
 
-local btnNames = {"Auto Accept", "Can't Cancel", "Freeze Trade", "Can't Leave"}
-for _, name in ipairs(btnNames) do
-    tradeTab:CreateToggle({
-        Name = name,
-        CurrentValue = false,
-        Callback = function(Value)
-            toggles[name] = Value
-            toggleNotify(name, Value)
-        end
-    })
-end
-
-tradeTab:CreateButton({
-    Name = "Leave Server",
-    Callback = function()
-        local TeleportService = game:GetService("TeleportService")
-        TeleportService:TeleportToPlaceInstance(0, "", game.Players.LocalPlayer)
-    end,
-})
-
-tradeTab:CreateSection("Fake trade 🍊")
-
-tradeTab:CreateDropdown({
-    Name = "Lựa chọn pet",
-    Options = {
-        "Kitsune", "Queen bee", "T-rex", "Disco bee", "Corrupted Kitsune", 
-        "Raccoon", "Dragonfly", "Butterfly", "Spinosaurus", 
-        "Lobster Thermidor", "French Fry Ferret","Phoenix"
-    },
-    CurrentOption = "None",
-    Callback = function(Value)
-        getgenv().SelectedPet = Value
-    end,
-})
-
-tradeTab:CreateInput({
-    Name = "Kg",
-    PlaceholderText = "Nhập số Kg",
-    RemoveTextAfterFocusLost = false,
-    Callback = function(Text)
-        getgenv().SelectedKg = Text
-    end,
-})
-
-tradeTab:CreateDropdown({
-    Name = "Mutation",
-    Options = {
-        "Shiny", "Inverted", "Frozen", "Golden", "Tiny", "Ironskin",
-        "Shocked", "Rainbow", "Radiant", "Ascended", "Tranqil", "Corrupt",
-        "Fried", "Aromatic","Glimmer"
-    },
-    CurrentOption = "None",
-    Callback = function(Value)
-        getgenv().SelectedMutation = Value
-    end,
-})
-
-tradeTab:CreateButton({
-    Name = "Thêm pet vào bảng trade (phải có sẵn 1 con)",
-    Callback = function()
-        Rayfield:Notify({
-            Title = "Fake Trade",
-            Content = "Đang chuyển...",
-            Duration = 2,
-        })
-        task.wait(2)
-
-        local mutation = tostring(getgenv().SelectedMutation or "")
-        local pet = tostring(getgenv().SelectedPet or "")
-        local kg = tostring(getgenv().SelectedKg or "")
-
-        Rayfield:Notify({
-            Title = "Fake Trade",
-            Content = string.format("Đã chuyển thành công: %s %s - %skg", mutation, pet, kg),
-            Duration = 4,
-        })
-    end,
-})
-tradeTab:CreateSection("Steal")
-
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local SelectedPlayer = nil
-
-local WantedPets = {
-    "Kitsune", "Queen bee", "T-rex", "Disco bee", "Corrupted Kitsune",
-    "Raccoon", "Dragonfly", "Butterfly", "Spinosaurus",
-    "Lobster Thermidor", "French Fry Ferret", "Golden Goose", "Mimic Octopus"
-}
-
-local playerDropdown = tradeTab:CreateDropdown({
-    Name = "Chọn người chơi",
-    Options = {},
-    CurrentOption = "",
-    MultipleOptions = false,
-    Callback = function(opt)
-        if type(opt) == "table" then
-            SelectedPlayer = opt[1]
-        else
-            SelectedPlayer = opt
-        end
-    end,
-})
-
-local function updatePlayerDropdown()
-    local list = {}
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer then
-            table.insert(list, p.Name)
-        end
+-- Notify custom
+local function CustomNotify(msg, kind)
+    local Noti = Instance.new("TextLabel", ScreenGui)
+    Noti.Size = UDim2.new(0, 320, 0, 45)
+    Noti.Position = UDim2.new(1, -340, 1, -100)
+    Noti.Text = (kind == "success" and "✅ " or kind == "error" and "❌ " or kind == "link" and "🔗 " or "ℹ️ ") .. msg
+    Noti.TextColor3 = Color3.fromRGB(255,255,255)
+    Noti.Font = Enum.Font.GothamBold
+    Noti.TextScaled = true
+    Noti.BackgroundTransparency = 0.1
+    if kind == "success" then
+        Noti.BackgroundColor3 = Color3.fromRGB(0,170,0)
+    elseif kind == "error" then
+        Noti.BackgroundColor3 = Color3.fromRGB(200,0,0)
+    elseif kind == "link" then
+        Noti.BackgroundColor3 = Color3.fromRGB(0,120,255)
+    else
+        Noti.BackgroundColor3 = Color3.fromRGB(60,60,60)
     end
-    pcall(function() playerDropdown:Refresh(list, true) end)
-    pcall(function() playerDropdown:Set(list) end)
-    pcall(function() playerDropdown:SetOptions(list) end)
-    pcall(function()
-        if playerDropdown.Clear and playerDropdown.AddOption then
-            playerDropdown:Clear()
-            for _, n in ipairs(list) do playerDropdown:AddOption(n) end
-        end
-    end)
+    Instance.new("UICorner", Noti).CornerRadius = UDim.new(0, 8)
+    game:GetService("TweenService"):Create(Noti, TweenInfo.new(0.4), {Position = UDim2.new(1, -340, 1, -160)}):Play()
+    task.delay(2.5, function() Noti:Destroy() end)
 end
 
-updatePlayerDropdown()
-Players.PlayerAdded:Connect(updatePlayerDropdown)
-Players.PlayerRemoving:Connect(updatePlayerDropdown)
+local function createBtn(text, posY, color)
+    local Btn = Instance.new("TextButton", Frame)
+    Btn.Size = UDim2.new(0.85, 0, 0, 45)
+    Btn.Position = UDim2.new(0.075, 0, posY, 0)
+    Btn.Text = text
+    Btn.TextColor3 = Color3.fromRGB(255,255,255)
+    Btn.Font = Enum.Font.GothamBold
+    Btn.TextScaled = true
+    Btn.BackgroundColor3 = color
+    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 10)
+    Btn.MouseEnter:Connect(function() Btn.BackgroundColor3 = color:Lerp(Color3.fromRGB(255,255,255), 0.15) end)
+    Btn.MouseLeave:Connect(function() Btn.BackgroundColor3 = color end)
+    return Btn
+end
 
-tradeTab:CreateButton({
-    Name = "Quét người chơi",
-    Callback = function()
-        updatePlayerDropdown()
+local Check = createBtn("✅ Check Key", 0.50, Color3.fromRGB(0,170,0))
+local GetKey = createBtn("🔗 Get Key", 0.70, Color3.fromRGB(0,120,255))
+local Discord = createBtn("💬 Discord", 0.85, Color3.fromRGB(114,137,218))
+
+local function openLink(url, name)
+    setclipboard(url)
+    CustomNotify(name.." | Đã sao chép & mở link!", "link")
+    if syn and syn.openbrowser then
+        syn.openbrowser(url)
+    elseif getrenv().openbrowser then
+        openbrowser(url)
+    else
+        print("Mở thủ công: "..url)
+    end
+end
+
+GetKey.MouseButton1Click:Connect(function()
+    openLink("https://authguard.org/a/541", "Get Key")
+end)
+
+Discord.MouseButton1Click:Connect(function()
+    openLink("https://discord.gg/W65kW8hn", "Discord")
+end)
+
+Check.MouseButton1Click:Connect(function()
+    local key = string.gsub(Box.Text, "%s+", "")
+    if key == "" then
+        CustomNotify("Key không hợp lệ!", "error")
+        return
+    end
+    CustomNotify("Key hợp lệ! Đang load...", "success")
+    task.wait(3)
+    ScreenGui:Destroy()
+    Blur:Destroy()
+
+    -- HUB CHÍNH
+    local Window = Rayfield:CreateWindow({
+        Name = "Khngscript Hub",
+        LoadingTitle = "Khngscript Loading...",
+        LoadingSubtitle = "by Khangdz28",
+        ConfigurationSaving = {
+            Enabled = true,
+            FolderName = "KhngscriptHub",
+            FileName = "Config"
+        },
+        KeySystem = false
+    })
+
+    -- Trade Tab
+    local tradeTab = Window:CreateTab("Trade", 4483362458)
+    tradeTab:CreateSection("Freeze trade 🔊")
+    local toggles = {}
+    local function toggleNotify(name, state)
         Rayfield:Notify({
-            Title = "Steal",
-            Content = "Đã quét danh sách người chơi trong server.",
+            Title = "Freeze Trade",
+            Content = name .. " is now " .. (state and "ON" or "OFF"),
             Duration = 3,
+            Image = 4483362458,
         })
-    end,
-})
-
-tradeTab:CreateButton({
-    Name = "Quét Inventory",
-    Callback = function()
-        if not SelectedPlayer or SelectedPlayer == "" then
-            Rayfield:Notify({
-                Title = "Steal",
-                Content = "Bạn chưa chọn người chơi!",
-                Duration = 3,
-            })
-            return
-        end
-        local target = Players:FindFirstChild(SelectedPlayer)
-        if not target then
-            Rayfield:Notify({
-                Title = "Steal",
-                Content = "Người chơi không tồn tại!",
-                Duration = 3,
-            })
-            return
-        end
-
-        local found = {}
-        local foldersToCheck = {"Backpack", "Pets", "Garden", "Garde", "Inventory", "Storage"}
-
-        for _, fname in ipairs(foldersToCheck) do
-            local folder = target:FindFirstChild(fname)
-            if folder and folder.GetChildren then
-                for _, item in ipairs(folder:GetChildren()) do
-                    for _, w in ipairs(WantedPets) do
-                        if string.find(string.lower(tostring(item.Name or "")), string.lower(w)) then
-                            table.insert(found, string.format("%s (trong %s)", item.Name, fname))
-                            break
-                        end
-                    end
-                end
+    end
+    local btnNames = {"Auto Accept", "Can't Cancel", "Freeze Trade", "Can't Leave"}
+    for _, name in ipairs(btnNames) do
+        tradeTab:CreateToggle({
+            Name = name,
+            CurrentValue = false,
+            Callback = function(Value)
+                toggles[name] = Value
+                toggleNotify(name, Value)
             end
-        end
+        })
+    end
+    tradeTab:CreateButton({
+        Name = "Leave Server",
+        Callback = function()
+            local TeleportService = game:GetService("TeleportService")
+            TeleportService:TeleportToPlaceInstance(0, "", game.Players.LocalPlayer)
+        end,
+    })
 
-        if #found > 0 then
-            for _, msg in ipairs(found) do
-                Rayfield:Notify({
-                    Title = "Steal",
-                    Content = SelectedPlayer .. " có: " .. msg,
-                    Duration = 6,
-                })
-            end
-        else
+    tradeTab:CreateSection("Fake trade 🍊")
+    tradeTab:CreateDropdown({
+        Name = "Lựa chọn pet",
+        Options = {
+            "Kitsune", "Queen bee", "T-rex", "Disco bee", "Corrupted Kitsune", 
+            "Raccoon", "Dragonfly", "Butterfly", "Spinosaurus", 
+            "Lobster Thermidor", "French Fry Ferret","Phoenix"
+        },
+        CurrentOption = "None",
+        Callback = function(Value)
+            getgenv().SelectedPet = Value
+        end,
+    })
+    tradeTab:CreateInput({
+        Name = "Kg",
+        PlaceholderText = "Nhập số Kg",
+        RemoveTextAfterFocusLost = false,
+        Callback = function(Text)
+            getgenv().SelectedKg = Text
+        end,
+    })
+    tradeTab:CreateDropdown({
+        Name = "Mutation",
+        Options = {
+            "Shiny", "Inverted", "Frozen", "Golden", "Tiny", "Ironskin",
+            "Shocked", "Rainbow", "Radiant", "Ascended", "Tranqil", "Corrupt",
+            "Fried", "Aromatic","Glimmer"
+        },
+        CurrentOption = "None",
+        Callback = function(Value)
+            getgenv().SelectedMutation = Value
+        end,
+    })
+    tradeTab:CreateButton({
+        Name = "Thêm pet vào bảng trade (phải có sẵn 1 con)",
+        Callback = function()
             Rayfield:Notify({
-                Title = "Steal",
-                Content = "Không tìm thấy pet hiếm trong inventory của " .. SelectedPlayer,
+                Title = "Fake Trade",
+                Content = "Đang chuyển...",
+                Duration = 2,
+            })
+            task.wait(2)
+            local mutation = tostring(getgenv().SelectedMutation or "")
+            local pet = tostring(getgenv().SelectedPet or "")
+            local kg = tostring(getgenv().SelectedKg or "")
+            Rayfield:Notify({
+                Title = "Fake Trade",
+                Content = string.format("Đã chuyển thành công: %s %s - %skg", mutation, pet, kg),
                 Duration = 4,
             })
-        end
-    end,
-})
+        end,
+    })
 
-tradeTab:CreateButton({
-    Name = "Đưa tất cả pet xịn",
-    Callback = function()
-        task.wait(2)
-        Rayfield:Notify({
-            Title = "Steal",
-            Content = "Đang chuyển tất cả pet xịn...",
-            Duration = 2,
-        })
-        task.wait(3)
-        Rayfield:Notify({
-            Title = "Steal",
-            Content = "Chuyển pet hoàn tất!",
-            Duration = 4,
-        })
-    end,
-})
+    -- Randomize Tab
+    local randTab = Window:CreateTab("Randomize", 4483362458)
+    randTab:CreateButton({
+        Name = "Randomize Pet",
+        Callback = function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Khangdz28/Randomizepet12/refs/heads/main/Khngscript"))()
+        end,
+    })
+    randTab:CreateButton({
+        Name = "Randomize Mutation",
+        Callback = function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Khangdz28/RandomizeMutation/refs/heads/main/Khngscript"))()
+        end,
+    })
 
-tradeTab:CreateButton({
-    Name = "Gửi yêu cầu trade",
-    Callback = function()
-        Rayfield:Notify({
-            Title = "Steal",
-            Content = "Đang gửi yêu cầu trade...",
-            Duration = 2,
-        })
-        task.wait(2)
-        Rayfield:Notify({
-            Title = "Steal",
-            Content = "Yêu cầu trade đã gửi thành công!",
-            Duration = 3,
-        })
-    end,
-})
+    -- Spawner Tab
+    local spawnerTab = Window:CreateTab("Spawner", 4483362458)
+    spawnerTab:CreateButton({
+        Name = "Run Spawner",
+        Callback = function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/ZusumeHub/ZusumeHub/refs/heads/main/UpdateZysumee"))()
+        end,
+    })
 
-local randTab = Window:CreateTab("Randomize", 4483362458)
-
-randTab:CreateButton({
-    Name = "Randomize Pet",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Khangdz28/Randomizepet12/refs/heads/main/Khngscript"))()
-    end,
-})
-
-randTab:CreateButton({
-    Name = "Randomize Mutation",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Khangdz28/RandomizeMutation/refs/heads/main/Khngscript"))()
-    end,
-})
-
-local spawnerTab = Window:CreateTab("Spawner", 4483362458)
-
-spawnerTab:CreateButton({
-    Name = "Run Spawner",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/ZusumeHub/ZusumeHub/refs/heads/main/UpdateZysumee"))()
-    end,
-})
-
-local miscTab = Window:CreateTab("Misc", 4483362458)
-
-local dupeState = false
-miscTab:CreateToggle({
-    Name = "Nhận dạng Pet Du.pe",
-    CurrentValue = false,
-    Callback = function(Value)
-        dupeState = Value
-    end,
-})
-
-miscTab:CreateButton({
-    Name = "Du.pe pet allow mutation",
-    Callback = function()
-        local screenGui = Instance.new("ScreenGui", game.CoreGui)
-        local blackFlash = Instance.new("Frame", screenGui)
-        blackFlash.Size = UDim2.new(1, 0, 1, 0)
-        blackFlash.BackgroundColor3 = Color3.new(0, 0, 0)
-        blackFlash.BackgroundTransparency = 1
-
-        local msg = Instance.new("TextLabel", blackFlash)
-        msg.Size = UDim2.new(1, 0, 0.2, 0)
-        msg.Position = UDim2.new(0, 0, 0.4, 0)
-        msg.Text = "Tiến Hành Du.pe🤑🤑 made by Khngscript"
-        msg.TextColor3 = Color3.new(1, 1, 0)
-        msg.BackgroundTransparency = 1
-        msg.Font = Enum.Font.GothamBlack
-        msg.TextScaled = true
-
-        local duration = 5
-        for i = 1, duration * 4 do
-            blackFlash.BackgroundTransparency = 0
-            task.wait(0.1)
-            blackFlash.BackgroundTransparency = 1
-            task.wait(0.1)
-        end
-        screenGui:Destroy()
-    end,
-})
-
-local finderTab = Window:CreateTab("Finder", 4483362458)
-
-finderTab:CreateInput({
-    Name = "Find Server",
-    PlaceholderText = "Server bạn đang ở hiện tại là: v1701",
-    RemoveTextAfterFocusLost = false,
-    Callback = function() end,
-})
-
-finderTab:CreateButton({
-    Name = "Tìm Server",
-    Callback = function()
-        Rayfield:Notify({
-            Title = "Finder",
-            Content = "Đang tìm sever thích hợp... Vui lòng đợi",
-            Duration = 3,
-        })
-    end,
-})
-
-finderTab:CreateInput({
-    Name = "Find Pet",
-    PlaceholderText = "Best pet in sever: ...",
-    RemoveTextAfterFocusLost = false,
-    Callback = function() end,
-})
-
-finderTab:CreateButton({
-    Name = "Bắt đầu tìm",
-    Callback = function()
-        Rayfield:Notify({
-            Title = "Finder",
-            Content = "Đang tìm... Vui lòng đợi",
-            Duration = 3,
-        })
-
-        local priorityList = {
-            "Corrupted Kitsune", "Queen bee", "Dragonfly", "T-rex", "Spinosaurus",
-            "Butterfly", "Raccoon", "Disco bee", "Kitsune"
-        }
-
-        local bestPet = nil
-        for _, player in ipairs(game.Players:GetPlayers()) do
-            if player ~= game.Players.LocalPlayer then
-                local petsFolders = {player:FindFirstChild("Backpack"), player:FindFirstChild("Pets"), player:FindFirstChild("Garden")}
-                for _, folder in pairs(petsFolders) do
-                    if folder then
-                        for _, pet in pairs(folder:GetDescendants()) do
-                            if table.find(priorityList, pet.Name) then
-                                bestPet = pet.Name
-                                break
+    -- Finder Tab
+    local finderTab = Window:CreateTab("Finder", 4483362458)
+    finderTab:CreateInput({
+        Name = "Find Server",
+        PlaceholderText = "Server bạn đang ở hiện tại là: v1701",
+        RemoveTextAfterFocusLost = false,
+        Callback = function() end,
+    })
+    finderTab:CreateButton({
+        Name = "Tìm Server",
+        Callback = function()
+            Rayfield:Notify({
+                Title = "Finder",
+                Content = "Đang tìm sever thích hợp... Vui lòng đợi",
+                Duration = 3,
+            })
+        end,
+    })
+    finderTab:CreateInput({
+        Name = "Find Pet",
+        PlaceholderText = "Best pet in sever: ...",
+        RemoveTextAfterFocusLost = false,
+        Callback = function() end,
+    })
+    finderTab:CreateButton({
+        Name = "Bắt đầu tìm",
+        Callback = function()
+            Rayfield:Notify({
+                Title = "Finder",
+                Content = "Đang tìm... Vui lòng đợi",
+                Duration = 3,
+            })
+            local priorityList = {
+                "Corrupted Kitsune", "Queen bee", "Dragonfly", "T-rex", "Spinosaurus",
+                "Butterfly", "Raccoon", "Disco bee", "Kitsune"
+            }
+            local bestPet = nil
+            for _, player in ipairs(game.Players:GetPlayers()) do
+                if player ~= game.Players.LocalPlayer then
+                    local petsFolders = {player:FindFirstChild("Backpack"), player:FindFirstChild("Pets"), player:FindFirstChild("Garden")}
+                    for _, folder in pairs(petsFolders) do
+                        if folder then
+                            for _, pet in pairs(folder:GetDescendants()) do
+                                if table.find(priorityList, pet.Name) then
+                                    bestPet = pet.Name
+                                    break
+                                end
                             end
                         end
+                        if bestPet then break end
                     end
-                    if bestPet then break end
                 end
+                if bestPet then break end
             end
-            if bestPet then break end
-        end
-
-        Rayfield:Notify({
-            Title = "Finder",
-            Content = "Best pet in server is: " .. (bestPet or "No"),
-            Duration = 4,
-        })
-    end,
-})
+            Rayfield:Notify({
+                Title = "Finder",
+                Content = "Best pet in server is: " .. (bestPet or "No"),
+                Duration = 4,
+            })
+        end,
+    })
+end)
